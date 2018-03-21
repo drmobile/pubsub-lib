@@ -11,10 +11,6 @@ from google.api_core.exceptions import AlreadyExists
 
 logger = logging.getLogger(__name__)
 
-def on_published(future):
-    message_id = future.result()
-    logger.info('data has been publised with message id {}'.format(message_id))
-
 class PubSubBase(metaclass=abc.ABCMeta):
     def __init__(self, project, cred_json):
         self.project = project
@@ -40,30 +36,37 @@ class PublisherClient(PubSubBase):
         try:
             return self.client.create_topic(topic)
         except AlreadyExists:
-            logger.debug('topic {} already exists'.format(topic))
+            logger.debug('topic {} already exists.'.format(topic))
+
+    def on_published(self, future, callback):
+        message_id = future.result()
+        logger.info('data has been publised with message id {}.'.format(message_id))
+        if callback is not None:
+            callback(message_id)
 
     # To publish a message, use the publish() method. 
     # This method accepts two positional arguments: the topic to publish to, 
     # and the body of the message. It also accepts arbitrary keyword arguments, 
     # which are passed along as attributes of the message.
-    def publish(self, topic, data):
+    def publish(self, topic, payload, callback=None, **kwargs):
         try:
-            dtype = type(data)
+            dtype = type(payload)
             if dtype is bytes:
                 # good to go head
-                msg = data
+                msg = payload
+            elif dtype is str:
+                msg = payload.encode('utf-8')
             elif dtype is dict:
                 # convert dict into JSON
-                msg = json.dumps(data).encode('utf-8')
-            elif dtype is str:
-                msg = data.encode('utf-8')
+                msg = json.dumps(payload).encode('utf-8')
             else:
-                raise ValueError('unexpected data type which is {}'.format(type(data)))
+                raise ValueError('unexpected data type which is {}.'.format(type(data)))
             topic = self.topic_path(self.client, topic)
-            future = self.client.publish(topic, msg)
-            future.add_done_callback(on_published)
+            future = self.client.publish(topic, msg, **kwargs)
+            future.add_done_callback(lambda future: self.on_published(future, callback))
         except ValueError as e:
             logger.error(e)
+
 
 class SubscribeClient(PubSubBase):
     def __init__(self, project, cred_json):
@@ -76,7 +79,8 @@ class SubscribeClient(PubSubBase):
         try:
             self.client.create_subscription(subscription_name, topic)
         except AlreadyExists:
-            logger.debug('subscription {} already exists'.format(subscription_name))
+            logger.debug('subscription {} already exists.'.format(subscription_name))
         finally:
             return self.client.subscribe(subscription_name)
+
             
