@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class PubSubBase(metaclass=abc.ABCMeta):
     def __init__(self, project, cred_json):
         self.project = project
-        self.cred = service_account.Credentials.from_service_account_file(cred_json)
+        self.cred = None if cred_json is None else service_account.Credentials.from_service_account_file(cred_json)
 
     def topic_path(self, client, topic):
         # The resource path for the new topic contains the project ID

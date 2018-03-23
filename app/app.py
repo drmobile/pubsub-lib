@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # coding=utf-8
 #
-import json
+import os
 import logging
 
 from pubsub_client import PublisherClient, SubscribeClient
@@ -19,7 +20,7 @@ def callback(payload):
 
 if __name__ == '__main__':
     project = 'pubsub-trial-198610'
-    cred = './pubsub-trial-f5e6dbba824c.json'
+    cred = None if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ else './pubsub-trial-f5e6dbba824c.json'
 
     # prepare publisher
     publisher = PublisherClient(project, cred)
