@@ -1,6 +1,6 @@
 # coding=utf-8
 #
-import abc
+import abc, six
 import json
 import logging
 # Imports the Google Cloud client library
@@ -11,7 +11,8 @@ from google.api_core.exceptions import AlreadyExists
 
 logger = logging.getLogger(__name__)
 
-class PubSubBase(metaclass=abc.ABCMeta):
+@six.add_metaclass(abc.ABCMeta)
+class PubSubBase():
     def __init__(self, project, cred_json):
         self.project = project
         self.cred = None if cred_json is None else service_account.Credentials.from_service_account_file(cred_json)
