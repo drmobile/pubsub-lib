@@ -22,6 +22,7 @@ install:
 
 script:
   - echo $PUBSUB_EMULATOR_HOST
+  - pytest app/pubsub_test.py
 
 after_script:
   - docker rm -f emulator
