@@ -1,13 +1,13 @@
-#!/usr/bin/env python
 # coding=utf-8
 #
+import os
 import time
+import docker
 import pytest
 import logging
 import unittest
 
 from soocii_pubsub_lib import pubsub_client
-#PublisherClient, SubscribeClient
 
 ########## Initial Logger ##########
 # Logger
@@ -22,10 +22,19 @@ class PubSubTests(unittest.TestCase):
         self.cred = None
         self.topic = 'fake-topic'
         self.published_message_id = None
-        pass
+
+        # start pubsub emulator
+        client = docker.from_env()
+        self.container = client.containers.run('bigtruedata/gcloud-pubsub-emulator', 
+                                                'start --host-port=0.0.0.0:8538 --data-dir=/data',
+                                                ports = {'8538/tcp': 8538},
+                                                detach = True,
+                                                auto_remove = True)
+        # export PUBSUB_EMULATOR_HOST=127.0.0.1:8538
+        os.environ["PUBSUB_EMULATOR_HOST"] = "127.0.0.1:8538"
 
     def tearDown(self):
-        pass
+        self.container.stop()
 
     def __on_published(self, message_id):
         logger.info('message is published with message id: {}'.format(message_id))
@@ -50,8 +59,6 @@ class PubSubTests(unittest.TestCase):
         time.sleep(1)
         # verify if message has been published
         self.assertTrue(self.published_message_id is not None)
-
-        pass
 
 # TODO: publish to non-exist topic
 # TODO: test publish with timeout when PubSub service is not available
