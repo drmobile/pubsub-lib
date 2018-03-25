@@ -16,25 +16,62 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger(__name__)
 ########################################
 
-class PubSubTests(unittest.TestCase):
+container = None
+
+@pytest.fixture()
+def start_emulator(request):
+    # start pubsub emulator
+    client = docker.from_env()
+    container = client.containers.run('bigtruedata/gcloud-pubsub-emulator', 
+                                            'start --host-port=0.0.0.0:8538 --data-dir=/data',
+                                            ports = {'8538/tcp': 8538},
+                                            detach = True,
+                                            auto_remove = True)
+    def stop_emulator():
+        container.stop()
+    request.addfinalizer(stop_emulator)
+    return container
+
+# class PublishTestsWithoutEmulator(unittest.TestCase):
+#     def setUp(self):
+#         self.project = 'fake-project'
+#         self.cred = None
+#         self.topic = 'fake-topic'
+#         self.published_message_id = None
+#         # export PUBSUB_EMULATOR_HOST=127.0.0.1:8538
+#         os.environ["PUBSUB_EMULATOR_HOST"] = "127.0.0.1:8538"
+
+#     def tearDown(self):
+#         pass
+
+#     def __on_published(self, message_id):
+#         logger.info('message is published with message id: {}'.format(message_id))
+#         self.published_message_id = message_id
+
+#     def test_publish_without_emulator(self):
+#         # prepare publisher
+#         publisher = pubsub_client.PublisherClient(self.project, self.cred)
+#         topic = publisher.create_topic(self.topic)
+
+#         # publish bytes
+#         publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
+#         # wait for callback
+#         time.sleep(1)
+#         # verify if message has been published
+#         self.assertTrue(self.published_message_id is not None)
+    
+@pytest.mark.usefixtures("start_emulator")
+class SimplePublishTests(unittest.TestCase):
     def setUp(self):
         self.project = 'fake-project'
         self.cred = None
         self.topic = 'fake-topic'
         self.published_message_id = None
-
-        # start pubsub emulator
-        client = docker.from_env()
-        self.container = client.containers.run('bigtruedata/gcloud-pubsub-emulator', 
-                                                'start --host-port=0.0.0.0:8538 --data-dir=/data',
-                                                ports = {'8538/tcp': 8538},
-                                                detach = True,
-                                                auto_remove = True)
         # export PUBSUB_EMULATOR_HOST=127.0.0.1:8538
         os.environ["PUBSUB_EMULATOR_HOST"] = "127.0.0.1:8538"
 
     def tearDown(self):
-        self.container.stop()
+        pass
 
     def __on_published(self, message_id):
         logger.info('message is published with message id: {}'.format(message_id))
@@ -43,8 +80,7 @@ class PubSubTests(unittest.TestCase):
     def __on_received(self, payload):
         pass
 
-    #@pytest.mark.first
-    def test_publish(self):
+    def test_publish_bytes_data(self):
         # prepare publisher
         publisher = pubsub_client.PublisherClient(self.project, self.cred)
         topic = publisher.create_topic(self.topic)
@@ -59,6 +95,36 @@ class PubSubTests(unittest.TestCase):
         time.sleep(1)
         # verify if message has been published
         self.assertTrue(self.published_message_id is not None)
+
+    def test_publish_string(self):
+        # prepare publisher
+        publisher = pubsub_client.PublisherClient(self.project, self.cred)
+        topic = publisher.create_topic(self.topic)
+
+        # publish string
+        publisher.publish(self.topic, 'string data', callback=lambda message_id: self.__on_published(message_id))
+        # wait for callback
+        time.sleep(1)
+        # verify if message has been published
+        self.assertTrue(self.published_message_id is not None)
+
+    def test_publish_dict(self):
+        # prepare publisher
+        publisher = pubsub_client.PublisherClient(self.project, self.cred)
+        topic = publisher.create_topic(self.topic)
+
+        # publish dict
+        data = {
+            'f1': 1,
+            'f2': '2',
+            'f3': [3, 4, 5]
+        }        
+        publisher.publish(self.topic, data, callback=lambda message_id: self.__on_published(message_id))
+        # wait for callback
+        time.sleep(1)
+        # verify if message has been published
+        self.assertTrue(self.published_message_id is not None)
+                
 
 # TODO: publish to non-exist topic
 # TODO: test publish with timeout when PubSub service is not available

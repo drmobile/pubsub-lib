@@ -40,8 +40,17 @@ class PublisherClient(PubSubBase):
             logger.debug('topic {} already exists.'.format(topic))
 
     def on_published(self, future, callback):
-        message_id = future.result()
-        logger.info('data has been publised with message id {}.'.format(message_id))
+        message_id = None
+        if future.cancelled():
+            logger.warn('{}: canceled'.format(future.arg))
+        elif future.done():
+            error = future.exception()
+            if error:
+                logger.error('{}: error returned: {}'.format(future.arg, error))
+            else:
+                message_id = future.result()
+                logger.info('data has been publised with message id {}.'.format(message_id))
+
         if callback is not None:
             callback(message_id)
 
