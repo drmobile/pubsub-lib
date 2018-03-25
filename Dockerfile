@@ -15,8 +15,9 @@ RUN rm -rf /var/cache/apk/*
 COPY ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
-COPY ./app /var/pubsub/broker
-
+ADD app.py /var/pubsub/broker
+ADD pubsub-trial-f5e6dbba824c.json /var/pubsub/broker
+COPY ./soocii_pubsub_lib /var/pubsub/broker/soocii_pubsub_lib
 
 # Setup container version in order to workaround error
 # One or more build-args [VERSION] were not consumed, failing build.

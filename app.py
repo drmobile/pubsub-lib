@@ -4,12 +4,14 @@
 import os
 import logging
 
-from pubsub_client import PublisherClient, SubscribeClient
-from sub_service import SubscriptionService
+from soocii_pubsub_lib import pubsub_client, sub_service
+
+# from pubsub_client import PublisherClient, SubscribeClient
+# from sub_service import SubscriptionService
 
 ########## Initial Logger ##########
 # Logger
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
             format='[%(asctime)-15s][%(levelname)-5s][%(filename)s][%(funcName)s#%(lineno)d] %(message)s')
 logger = logging.getLogger(__name__)
 ########################################
@@ -19,15 +21,16 @@ def callback(payload):
     # raise Exception if any error occur    
 
 if __name__ == '__main__':
-    project = 'pubsub-trial-198610'
+    project = None if 'PUBSUB_PROJECT_ID' in os.environ else 'pubsub-trial-198610'
     cred = None if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ else './pubsub-trial-f5e6dbba824c.json'
+    logger.info('project: {}, cred: {}'.format(project, cred))
 
     # prepare publisher
-    publisher = PublisherClient(project, cred)
+    publisher = pubsub_client.PublisherClient(project, cred)
     topic = publisher.create_topic('test-topic')
 
     # prepare subscriber
-    subscriber = SubscribeClient(project, cred)
+    subscriber = pubsub_client.SubscribeClient(project, cred)
     subscription = subscriber.create_subscription('test-topic', 'test-sub2')
 
     # publish bytes
@@ -42,5 +45,5 @@ if __name__ == '__main__':
     }
     publisher.publish('test-topic', data, addition1='test1', addition2='test2')
 
-    service = SubscriptionService(subscription)
+    service = sub_service.SubscriptionService(subscription)
     service.run(callback)
