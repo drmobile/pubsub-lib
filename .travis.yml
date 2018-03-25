@@ -17,7 +17,7 @@ install:
 - pip install -r test-requirements.txt
 script:
 - echo $PUBSUB_EMULATOR_HOST
-- pytest app/pubsub_test.py
+- pytest
 after_script:
 - docker rm -f emulator
 # notifications:

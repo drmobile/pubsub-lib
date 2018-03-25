@@ -6,7 +6,8 @@ import pytest
 import logging
 import unittest
 
-from pubsub_client import PublisherClient, SubscribeClient
+from soocii_pubsub_lib import pubsub_client
+#PublisherClient, SubscribeClient
 
 ########## Initial Logger ##########
 # Logger
@@ -36,11 +37,11 @@ class PubSubTests(unittest.TestCase):
     #@pytest.mark.first
     def test_publish(self):
         # prepare publisher
-        publisher = PublisherClient(self.project, self.cred)
+        publisher = pubsub_client.PublisherClient(self.project, self.cred)
         topic = publisher.create_topic(self.topic)
 
         # # prepare subscriber
-        # subscriber = SubscribeClient(self.project, self.cred)
+        # subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         # subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
 
         # publish bytes
