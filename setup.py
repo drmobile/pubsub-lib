@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='pubsub-broker',
+    name='soocii-pubsub-broker',
     version='0.1',
     url='https://github.com/drmobile/pubsub-broker',
     license='Apache Software License',
@@ -11,4 +11,3 @@ setup(
     packages=find_packages(exclude=['tests']),
     long_description=open('README.md').read(),
     zip_safe=False)
-    
