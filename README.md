@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/drmobile/pubsub-broker.svg?branch=master)](https://travis-ci.org/drmobile/pubsub-broker)
+[![Build Status](https://travis-ci.org/drmobile/pubsub-lib.svg?branch=master)](https://travis-ci.org/drmobile/pubsub-lib)
 
 # pubsub-lib
 
