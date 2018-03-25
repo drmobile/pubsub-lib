@@ -1,4 +1,2 @@
 google-cloud
 google-cloud-pubsub
-
-pytest
