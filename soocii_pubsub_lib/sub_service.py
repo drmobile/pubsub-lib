@@ -2,35 +2,26 @@
 #
 import json
 import signal
-import asyncio
 import logging
+import threading
 
 logger = logging.getLogger(__name__)
 
 class SubscriptionService():
     def __init__(self, subscription):
         self.subscription = subscription
-        self.ev_loop = asyncio.get_event_loop()
         # create service stop event
-        self.stop = asyncio.Event(loop=self.ev_loop)
+        self.stop = threading.Event()
         self.stop.clear()    # default false
 
-    async def __exit(self, signame):
-        logger.info('got signal {}: exit.'.format(signame))
+    def __exit(self, signalnum, frame):
+        logger.info('got signal {} {}: exit.'.format(signalnum, frame))
         self.stop.set()
-        this = asyncio.Task.current_task()
-        tasks = asyncio.Task.all_tasks()
-        # signal pending tasks to clean up except itself
-        for task in tasks:
-            if task is not this:
-                task.cancel()
         # close subscription channel
         logger.info('close subscription channel.')
         self.subscription.close()
         # wait for pending tasks to clean up
         self.subscription_future.result()
-        # await asyncio.sleep(3)
-        self.ev_loop.stop()
 
     def __on_received(self, message, callback):
         # A message data and its attributes. 
@@ -63,15 +54,13 @@ class SubscriptionService():
     def run(self, callback = None):
         # add signal handler to stop the service
         for signame in ('SIGINT', 'SIGTERM'):
-            self.ev_loop.add_signal_handler(getattr(signal, signame),
-                                        lambda: asyncio.ensure_future(self.__exit(signame)))    
+            signal.signal(getattr(signal, signame), 
+                                        lambda signalnum, frame: self.__exit(signalnum, frame))
         try:
             # open subscription channel
             logger.info('open subscription channel.')
             self.subscription_future = self.subscription.open(lambda message: self.__on_received(message, callback))            
-            logger.info('Event loop running forever, press CTRL+C to interrupt.')
-            self.ev_loop.run_forever()
+            logger.info('subscription service is running forever, press CTRL+C to interrupt.')
+            self.stop.wait()
         except Exception as e:
             logger.error('unexpected exception was caughted {}.'.format(e))
-        finally:
-            self.ev_loop.close()
