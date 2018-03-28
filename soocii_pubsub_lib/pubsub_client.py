@@ -21,10 +21,10 @@ class PubSubBase():
         # The resource path for the new topic contains the project ID
         # and the topic name.
         return client.topic_path(self.project, topic)
-    
+
     def subscription_path(self, client, subscription_name):
         return client.subscription_path(self.project, subscription_name)
-            
+
 class PublisherClient(PubSubBase):
     def __init__(self, project, cred_json):
         super(PublisherClient, self).__init__(project, cred_json)
@@ -40,6 +40,7 @@ class PublisherClient(PubSubBase):
             logger.debug('topic {} already exists.'.format(topic))
 
     def on_published(self, future, callback):
+        logger.debug('callback for publish message')
         message_id = None
         if future.cancelled():
             logger.warn('{}: canceled'.format(future.arg))
@@ -54,12 +55,13 @@ class PublisherClient(PubSubBase):
         if callback is not None:
             callback(message_id)
 
-    # To publish a message, use the publish() method. 
-    # This method accepts two positional arguments: the topic to publish to, 
-    # and the body of the message. It also accepts arbitrary keyword arguments, 
+    # To publish a message, use the publish() method.
+    # This method accepts two positional arguments: the topic to publish to,
+    # and the body of the message. It also accepts arbitrary keyword arguments,
     # which are passed along as attributes of the message.
     def publish(self, topic, payload, callback=None, **kwargs):
         try:
+            logger.debug('publish message to {}'.format(topic))
             dtype = type(payload)
             if dtype is bytes:
                 # good to go head
@@ -73,16 +75,23 @@ class PublisherClient(PubSubBase):
                 raise ValueError('unexpected data type which is {}.'.format(type(data)))
             topic = self.topic_path(self.client, topic)
             future = self.client.publish(topic, msg, **kwargs)
-            future.add_done_callback(lambda future: self.on_published(future, callback))
-        except ValueError as e:
-            logger.error(e)
-
+            # async call
+            if callback is not None:
+                future.add_done_callback(lambda future: self.on_published(future, callback))
+            # sync call
+            else:
+                message_id = future.result()
+                logger.info('data has been publised with message id {}.'.format(message_id))
+                return message_id
+        except Exception as e:
+            logger.error('unexpected exception is caught: '.format(e))
+            raise e
 
 class SubscribeClient(PubSubBase):
     def __init__(self, project, cred_json):
         super(SubscribeClient, self).__init__(project, cred_json)
         self.client = pubsub_v1.SubscriberClient(credentials=self.cred)
-    
+
     def create_subscription(self, topic, subscription_name):
         topic = self.topic_path(self.client, topic)
         subscription_name = self.subscription_path(self.client, subscription_name)
@@ -93,4 +102,3 @@ class SubscribeClient(PubSubBase):
         finally:
             return self.client.subscribe(subscription_name)
 
-            
