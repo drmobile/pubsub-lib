@@ -12,10 +12,10 @@ install:
 - pip install -r test-requirements.txt
 script:
 - pytest
-# notifications:
-#   email:
-#     recipients:
-#       - service@soocii.me
+notifications:
+  email:
+    recipients:
+      - service@soocii.me
 deploy:
   provider: pypi
   user: jonascheng
