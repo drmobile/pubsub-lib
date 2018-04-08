@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 def callback(payload):
     logger.info(payload)
-    # raise Exception if any error occur
 
 
 if __name__ == '__main__':
