@@ -1,21 +1,23 @@
 # coding=utf-8
 #
-import abc, six
+import abc
+import six
 import json
 import logging
 # Imports the Google Cloud client library
 from google.cloud import pubsub_v1
-from google.oauth2 import service_account
+from google.oauth2 import service_account as sa
 
 from google.api_core.exceptions import AlreadyExists
 
 logger = logging.getLogger(__name__)
 
+
 @six.add_metaclass(abc.ABCMeta)
 class PubSubBase():
     def __init__(self, project, cred_json):
         self.project = project
-        self.cred = None if cred_json is None else service_account.Credentials.from_service_account_file(cred_json)
+        self.cred = None if cred_json is None else sa.Credentials.from_service_account_file(cred_json)
 
     def topic_path(self, client, topic):
         # The resource path for the new topic contains the project ID
@@ -25,19 +27,25 @@ class PubSubBase():
     def subscription_path(self, client, subscription_name):
         return client.subscription_path(self.project, subscription_name)
 
+
 class PublisherClient(PubSubBase):
     def __init__(self, project, cred_json):
         super(PublisherClient, self).__init__(project, cred_json)
         # Instantiates a client
         self.client = pubsub_v1.PublisherClient(credentials=self.cred)
 
-    # Create the topic.
-    def create_topic(self, topic):
+    # Creates the given topic with the given name.
+    def create_topic(self, topic, **kwargs):
         topic = self.topic_path(self.client, topic)
         try:
-            return self.client.create_topic(topic)
+            return self.client.create_topic(topic, **kwargs)
         except AlreadyExists:
             logger.debug('topic {} already exists.'.format(topic))
+
+    # Gets the configuration of a topic.
+    def get_topic(self, topic, **kwargs):
+        topic = self.topic_path(self.client, topic)
+        return self.client.get_topic(topic, **kwargs).name
 
     def on_published(self, future, callback):
         logger.debug('callback for publish message')
@@ -55,10 +63,12 @@ class PublisherClient(PubSubBase):
         if callback is not None:
             callback(message_id)
 
-    # To publish a message, use the publish() method.
-    # This method accepts two positional arguments: the topic to publish to,
-    # and the body of the message. It also accepts arbitrary keyword arguments,
-    # which are passed along as attributes of the message.
+    # To publish a message, use the publish() method. This method accepts two positional arguments:
+    # the topic to publish to, and the payload of the message.
+    # It also accepts arbitrary keyword arguments, which are passed along as attributes of the message.
+    # If callback is provided, this method invoke in async way and return message_id through callback.
+    # If callback is NOT provided, this method invoke in sync way and return message_id.
+    # Either async or sync way invokation, this method return tuple (message_id, future)
     def publish(self, topic, payload, callback=None, **kwargs):
         try:
             logger.debug('publish message to {}'.format(topic))
@@ -72,20 +82,22 @@ class PublisherClient(PubSubBase):
                 # convert dict into JSON
                 msg = json.dumps(payload).encode('utf-8')
             else:
-                raise ValueError('unexpected data type which is {}.'.format(type(data)))
+                raise ValueError('unexpected data type which is {}.'.format(dtype))
             topic = self.topic_path(self.client, topic)
             future = self.client.publish(topic, msg, **kwargs)
             # async call
             if callback is not None:
                 future.add_done_callback(lambda future: self.on_published(future, callback))
+                return (None, future)
             # sync call
             else:
                 message_id = future.result()
                 logger.info('data has been publised with message id {}.'.format(message_id))
-                return message_id
+                return (message_id, future)
         except Exception as e:
-            logger.error('unexpected exception is caught: '.format(e))
+            logger.error('unexpected exception is caught: {}'.format(e))
             raise e
+
 
 class SubscribeClient(PubSubBase):
     def __init__(self, project, cred_json):
@@ -101,4 +113,3 @@ class SubscribeClient(PubSubBase):
             logger.debug('subscription {} already exists.'.format(subscription_name))
         finally:
             return self.client.subscribe(subscription_name)
-
