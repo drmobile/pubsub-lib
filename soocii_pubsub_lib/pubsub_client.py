@@ -109,7 +109,7 @@ class PublisherClient(PubSubBase):
             payload -- A bytestring, string, or dictionary representing the message body.
 
         Keyword Arguments:
-            callback -- An optional callback (default: {None})
+            callback {function} -- An optional callback (default: {None})
             kwargs -- If you want to include attributes, simply add keyword arguments
 
         Raises:
@@ -150,6 +150,11 @@ class PublisherClient(PubSubBase):
 
 class Subscription():
     def __init__(self, subscription):
+        """A wrapped subscription resource for Google Cloud Pub/Sub.
+
+        Arguments:
+            subscription {google.cloud.pubsub_v1.types.Subscription} -- A subscription resource for Google Cloud Pub/Sub.
+        """
         self.subscription = subscription
 
     def __on_received(self, message, callback):
@@ -185,20 +190,54 @@ class Subscription():
         except Exception as e:
             logger.error('unexpected exception was caughted {}.'.format(e))
 
-    def open(self, callback):
+    def open(self, callback=None):
+        """Open a streaming pull connection and begin receiving messages.
+        If callback is provided, the message is ack as the callback function return True.
+        If callback is NOT provided, the message is always ack by default.
+
+        Keyword Arguments:
+            callback {function} -- The callback function. This function receives the dictionary as its only argument.
+                                    The message is ack as the callback function return True. (default: {None})
+
+        Returns:
+            concurrent.futures.Future -- A future that provides an interface to block on the subscription if desired, and handle errors.
+        """
         future = self.subscription.open(lambda message: self.__on_received(message, callback))
         return future
 
     def close(self):
+        """Close the existing connection.
+        """
         self.subscription.close()
 
 
 class SubscribeClient(PubSubBase):
     def __init__(self, project, cred_json):
+        """A wrapped subscriber client for Google Cloud Pub/Sub.
+
+        This creates an object that is capable of subscribing to messages. Generally, you can instantiate this client with no arguments, and you get sensible defaults.
+
+        Arguments:
+            project {str} -- Project id
+            cred_json {str} -- Full path to credential file in json format
+        """
         super(SubscribeClient, self).__init__(project, cred_json)
+        # Instantiates a client
         self.client = pubsub_v1.SubscriberClient(credentials=self.cred)
 
     def create_subscription(self, topic, subscription_name, **kwargs):
+        """Creates a subscription to a given topic.
+
+        Arguments:
+            topic {str} -- The topic name to subscribe messages from.
+            subscription_name {str} -- The name of the subscription.
+
+        Keyword Arguments:
+            retry {google.api_core.retry.Retry]} -- An optional retry object used to retry requests. If None is specified, requests will not be retried.
+
+        Returns:
+            Subscription -- A Subscription instance.
+        """
         topic = self.topic_path(self.client, topic)
         subscription_name = self.subscription_path(self.client, subscription_name)
         try:
