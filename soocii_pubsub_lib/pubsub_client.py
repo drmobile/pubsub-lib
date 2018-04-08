@@ -96,7 +96,6 @@ class PublisherClient(PubSubBase):
         if callback is not None:
             callback(message_id)
 
-    #
     def publish(self, topic, payload, callback=None, **kwargs):
         """To publish a message, use the publish() method. This method accepts two positional arguments:
         the topic to publish to, and the payload of the message.
@@ -111,6 +110,7 @@ class PublisherClient(PubSubBase):
 
         Keyword Arguments:
             callback -- An optional callback (default: {None})
+            kwargs -- If you want to include attributes, simply add keyword arguments
 
         Raises:
             ValueError -- If payload is not a bytestring, string, or dictionary.
@@ -144,8 +144,53 @@ class PublisherClient(PubSubBase):
                 logger.info('data has been publised with message id {}.'.format(message_id))
                 return (message_id, future)
         except Exception as e:
-            logger.error('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception is caughted: {}'.format(e))
             raise e
+
+
+class Subscription():
+    def __init__(self, subscription):
+        self.subscription = subscription
+
+    def __on_received(self, message, callback):
+        # A message data and its attributes.
+        # The message payload must not be empty; it must contain either a non-empty data field, or at least one attribute.
+        # https://googlecloudplatform.github.io/google-cloud-python/latest/pubsub/types.html#google.cloud.pubsub_v1.types.PubsubMessage
+        logger.info('message has been received, which is published at {}.'.format(message.publish_time))
+        logger.debug('message content is {}.'.format(message))
+        # callback custom
+        try:
+            if callback is not None:
+                # convert data into appropriate python data type
+                payload = message.data.decode('utf-8')
+                # try to convert into dict type
+                try:
+                    payload = json.loads(payload)
+                except Exception:
+                    pass
+                # convert attributes into dict type
+                attributes = {attr: message.attributes[attr] for attr in message.attributes}
+                dup_msg = {
+                    'message_id': message.message_id,
+                    'data': payload,
+                    'attributes': attributes
+                }
+                ack = callback(dup_msg)
+                if ack is True:
+                    # only ack message on callback return True
+                    message.ack()
+            else:
+                # alway ack message on received
+                message.ack()
+        except Exception as e:
+            logger.error('unexpected exception was caughted {}.'.format(e))
+
+    def open(self, callback):
+        future = self.subscription.open(lambda message: self.__on_received(message, callback))
+        return future
+
+    def close(self):
+        self.subscription.close()
 
 
 class SubscribeClient(PubSubBase):
@@ -153,12 +198,11 @@ class SubscribeClient(PubSubBase):
         super(SubscribeClient, self).__init__(project, cred_json)
         self.client = pubsub_v1.SubscriberClient(credentials=self.cred)
 
-    def create_subscription(self, topic, subscription_name):
+    def create_subscription(self, topic, subscription_name, **kwargs):
         topic = self.topic_path(self.client, topic)
         subscription_name = self.subscription_path(self.client, subscription_name)
         try:
-            self.client.create_subscription(subscription_name, topic)
+            self.client.create_subscription(subscription_name, topic, **kwargs)
         except AlreadyExists:
             logger.debug('subscription {} already exists.'.format(subscription_name))
-        finally:
-            return self.client.subscribe(subscription_name)
+        return Subscription(self.client.subscribe(subscription_name))
