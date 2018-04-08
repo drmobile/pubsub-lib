@@ -9,16 +9,18 @@ from soocii_pubsub_lib import pubsub_client, sub_service
 # from pubsub_client import PublisherClient, SubscribeClient
 # from sub_service import SubscriptionService
 
-########## Initial Logger ##########
-# Logger
-logging.basicConfig(level=logging.DEBUG,
-            format='[%(asctime)-15s][%(levelname)-5s][%(filename)s][%(funcName)s#%(lineno)d] %(message)s')
+# ========== Initial Logger ==========
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[%(asctime)-15s][%(levelname)-5s][%(filename)s][%(funcName)s#%(lineno)d] %(message)s')
 logger = logging.getLogger(__name__)
-########################################
+# ====================================
+
 
 def callback(payload):
     logger.info(payload)
-    # raise Exception if any error occur    
+    # raise Exception if any error occur
+
 
 if __name__ == '__main__':
     project = None if 'PUBSUB_PROJECT_ID' in os.environ else 'pubsub-trial-198610'
