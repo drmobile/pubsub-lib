@@ -1,7 +1,6 @@
 # coding=utf-8
 #
 import time
-import docker
 import pytest
 import logging
 import unittest
@@ -44,7 +43,7 @@ class NormalPublishTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # publish bytes
         publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
@@ -63,7 +62,7 @@ class NormalPublishTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # publish string
         publisher.publish(self.topic, 'string data', callback=lambda message_id: self.__on_published(message_id))
@@ -82,7 +81,7 @@ class NormalPublishTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # publish dict
         data = {
@@ -106,7 +105,7 @@ class NormalPublishTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # publish dict
         data = {
@@ -130,7 +129,7 @@ class NormalPublishTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # publish to the topic in sync way
         message_id, _ = publisher.publish(self.topic, b'bytes data')
@@ -175,7 +174,7 @@ class NormalSubscribeTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
@@ -202,7 +201,7 @@ class NormalSubscribeTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
@@ -234,7 +233,7 @@ class NormalSubscribeTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
@@ -267,7 +266,7 @@ class NormalSubscribeTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
@@ -331,7 +330,7 @@ class UnsupportedDataTypeTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # publish to the topic in sync way
         with self.assertRaises(ValueError):
@@ -359,7 +358,7 @@ class DuplicatedTopicTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # publish to the topic in sync way
         message_id, _ = publisher.publish(self.topic, b'bytes data')
@@ -397,7 +396,7 @@ class DuplicatedSubscriptionTests(unittest.TestCase):
             publisher.get_topic(self.topic)
         except Exception as e:
             exception_caughted = True
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
         self.assertFalse(exception_caughted)
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)

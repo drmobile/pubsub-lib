@@ -114,7 +114,7 @@ class PublisherClient(PubSubBase):
 
         Raises:
             ValueError -- If payload is not a bytestring, string, or dictionary.
-            Exception -- If unexpected exception is caughted
+            Exception -- If unexpected exception was caughted
 
         Returns:
             (str, concurrent.futures.Future) -- A tuple of message id and future instance
@@ -144,7 +144,7 @@ class PublisherClient(PubSubBase):
                 logger.info('data has been publised with message id {}.'.format(message_id))
                 return (message_id, future)
         except Exception as e:
-            logger.exception('unexpected exception is caughted: {}'.format(e))
+            logger.exception('unexpected exception was caughted: {}'.format(e))
             raise e
 
 

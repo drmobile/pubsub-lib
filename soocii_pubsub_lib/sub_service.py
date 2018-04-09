@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class SubscriptionService():
     def __init__(self, subscription):
+        logger.info('init instance of SubscriptionService')
         self.subscription = subscription
         # create service stop event
         self.stop = threading.Event()
@@ -25,8 +26,10 @@ class SubscriptionService():
         self.subscription_future.result()
 
     def run(self, callback=None):
+        logger.info('start running SubscriptionService')
         # add signal handler to stop the service
         for signame in ('SIGINT', 'SIGTERM'):
+            logger.info('register signal handler for {}'.format(signame))
             signal.signal(getattr(signal, signame), lambda signalnum, frame: self.__exit(signalnum, frame))
         try:
             # open subscription channel
@@ -35,4 +38,4 @@ class SubscriptionService():
             logger.info('subscription service is running forever, press CTRL+C to interrupt.')
             self.stop.wait()
         except Exception as e:
-            logger.error('unexpected exception was caughted {}.'.format(e))
+            logger.error('unexpected exception was caughted: {}.'.format(e))

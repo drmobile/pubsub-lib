@@ -6,9 +6,6 @@ import logging
 
 from soocii_pubsub_lib import pubsub_client, sub_service
 
-# from pubsub_client import PublisherClient, SubscribeClient
-# from sub_service import SubscriptionService
-
 # ========== Initial Logger ==========
 logging.basicConfig(
     level=logging.DEBUG,
