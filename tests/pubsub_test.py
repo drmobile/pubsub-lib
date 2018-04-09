@@ -287,6 +287,35 @@ class NormalSubscribeTests(unittest.TestCase):
         self.assertEqual(self.received_message['attributes']['addition1'], 'test1')
         self.assertEqual(self.received_message['attributes']['addition2'], 'test2')
 
+    def test_subscribe_message_without_callback(self):
+        # prepare publisher
+        publisher = pubsub_client.PublisherClient(self.project, self.cred)
+        publisher.create_topic(self.topic)
+        # get configuration of the topic before sending request
+        exception_caughted = False
+        try:
+            publisher.get_topic(self.topic)
+        except Exception as e:
+            exception_caughted = True
+            logger.exception('unexpected exception is caughted: {}'.format(e))
+        self.assertFalse(exception_caughted)
+        # prepare subscriber
+        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        # publish bytes
+        publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
+        # open subscription channel, and start receiving message
+        self.future = self.subscription.open()
+        # wait for callback
+        time.sleep(1)
+        # close subscription channel, and open again with callback
+        self.subscription.close()
+        self.future = self.subscription.open(callback=lambda message: self.__on_received(message))
+        # wait for callback
+        time.sleep(1)
+        # verify if message has been processed in previous channel
+        self.assertTrue(self.received_message is None)
+
 
 @pytest.mark.usefixtures("start_emulator")
 class NonExistTopicTests(unittest.TestCase):
@@ -366,6 +395,55 @@ class DuplicatedTopicTests(unittest.TestCase):
         message_id, _ = publisher.publish(self.topic, b'bytes data')
         # verify if message_id is returned
         self.assertTrue(message_id is not None)
+
+
+@pytest.mark.usefixtures("start_emulator")
+class DuplicatedSubscriptionTests(unittest.TestCase):
+    def setUp(self):
+        self.project = 'fake-project'
+        self.cred = None
+        self.topic = 'fake-topic'
+
+    def tearDown(self):
+        pass
+
+    def __on_published(self, message_id):
+        logger.info('message is published with message id: {}'.format(message_id))
+        self.published_message_id = message_id
+
+    def __on_received(self, message):
+        logger.info('message is received with payload: {}'.format(message))
+        self.received_message = message
+        # ack message
+        return True
+
+    def test_create_subscription_twice(self):
+        # prepare publisher
+        publisher = pubsub_client.PublisherClient(self.project, self.cred)
+        publisher.create_topic(self.topic)
+        # get configuration of the topic before sending request
+        exception_caughted = False
+        try:
+            publisher.get_topic(self.topic)
+        except Exception as e:
+            exception_caughted = True
+            logger.exception('unexpected exception is caughted: {}'.format(e))
+        self.assertFalse(exception_caughted)
+        # prepare subscriber
+        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        # publish bytes
+        publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
+        # open subscription channel, and start receiving message
+        self.future = self.subscription.open(callback=lambda message: self.__on_received(message))
+        # wait for callback
+        time.sleep(1)
+        # verify if message has been received
+        self.assertTrue(self.received_message is not None)
+        self.assertEqual(self.published_message_id, self.received_message['message_id'])
+        self.assertEqual(self.received_message['data'], 'bytes data')
+        self.assertEqual(self.received_message['attributes'], {})
 
 
 @pytest.mark.usefixtures("no_emulator")
