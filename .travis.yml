@@ -9,13 +9,13 @@ before_install:
 - docker pull bigtruedata/gcloud-pubsub-emulator
 install:
 - pip install -e .
-#- pip install -r test-requirements.txt
 - pip install -e .[dev]
 script:
 - pycodestyle --ignore=E501 soocii_pubsub_lib
 - pytest
 notifications:
   email:
+    on_success: never
     recipients:
       - service@soocii.me
 deploy:
