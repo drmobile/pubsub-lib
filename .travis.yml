@@ -12,7 +12,7 @@ install:
 - pip install -e .[dev]
 script:
 - pycodestyle --ignore=E501 soocii_pubsub_lib
-- pytest --cov-report term-missing --cov
+- pytest --cov-report term-missing --cov=soocii_pubsub_lib
 after_success:
 - coveralls
 notifications:
