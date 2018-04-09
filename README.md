@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/drmobile/pubsub-lib.svg?branch=master)](https://travis-ci.org/drmobile/pubsub-lib)
+[![Coverage Status](https://coveralls.io/repos/github/drmobile/pubsub-lib/badge.svg?branch=master)](https://coveralls.io/github/drmobile/pubsub-lib?branch=master)
 
 # pubsub-lib
 
