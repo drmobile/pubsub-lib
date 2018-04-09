@@ -8,9 +8,9 @@ services:
 before_install:
 - docker pull bigtruedata/gcloud-pubsub-emulator
 install:
-#- pip install -r requirements.txt
 - pip install -e .
-- pip install -r test-requirements.txt
+#- pip install -r test-requirements.txt
+- pip install -e .[dev]
 script:
 - pycodestyle --ignore=E501 soocii_pubsub_lib
 - pytest

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='soocii-pubsub-lib',
-    version='0.8',
+    version='0.9',
     url='https://github.com/drmobile/pubsub-broker',
     license='Apache Software License',
     author='Soocii',
@@ -36,4 +36,16 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['six', 'google-cloud', 'google-cloud-pubsub']
+
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). Users will be able to install these using the "extras"
+    # syntax, for example:
+    #
+    #   $ pip install soocii-pubsub-lib[dev]
+    #
+    # Similar to `install_requires` above, these must be valid existing
+    # projects.
+    extras_require={  # Optional
+        'dev': ['docker', 'pytest', 'pycodestyle', 'coverage'],
+    },
 )
