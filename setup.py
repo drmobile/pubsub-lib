@@ -46,6 +46,6 @@ setup(
     # Similar to `install_requires` above, these must be valid existing
     # projects.
     extras_require={  # Optional
-        'dev': ['docker', 'pytest', 'pycodestyle', 'coverage'],
+        'dev': ['docker', 'pytest', 'pycodestyle', 'pytest-cov', 'coveralls'],
     },
 )
