@@ -57,6 +57,7 @@ class NormalSubscribeTests(unittest.TestCase):
         logger.info('start publishing message')
         for i in range(5):
             publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
+            time.sleep(1)
 
     def __subscriber(self):
         # prepare subscriber
@@ -68,7 +69,7 @@ class NormalSubscribeTests(unittest.TestCase):
 
     def __waitter(self):
         # wait for callback
-        time.sleep(5)
+        time.sleep(10)
         self.service.shutdown()
 
     def test_subscribe_message(self):
@@ -86,7 +87,7 @@ class NormalSubscribeTests(unittest.TestCase):
             self.__subscriber()
 
         # verify if message has been received
-        #self.assertTrue(self.received_message is not None)
+        self.assertTrue(self.received_message is not None)
         self.assertEqual(self.published_message_id, self.received_message['message_id'])
         self.assertEqual(self.received_message['data'], 'bytes data')
         self.assertEqual(self.received_message['attributes'], {})
