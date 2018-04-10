@@ -66,6 +66,11 @@ class NormalSubscribeTests(unittest.TestCase):
         logger.info('start subscribing message')
         self.service.run(callback=lambda message: self.__on_received(message))
 
+    def __waitter(self):
+        # wait for callback
+        time.sleep(5)
+        self.service.shutdown()
+
     def test_subscribe_message(self):
         # prepare publisher
         publisher = pubsub_client.PublisherClient(self.project, self.cred)
@@ -75,11 +80,10 @@ class NormalSubscribeTests(unittest.TestCase):
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-            future1 = executor.submit(lambda: self.__subscriber())
-            future2 = executor.submit(lambda: self.__publisher())
-            # wait for callback
-            time.sleep(10)
-            self.service.shutdown()
+            executor.submit(lambda: self.__waitter())
+            executor.submit(lambda: self.__publisher())
+            # subscriber service is running in main thread
+            self.__subscriber()
 
         # verify if message has been received
         self.assertTrue(self.received_message is not None)
@@ -87,3 +91,26 @@ class NormalSubscribeTests(unittest.TestCase):
         self.assertEqual(self.received_message['data'], 'bytes data')
         self.assertEqual(self.received_message['attributes'], {})
         self.assertEqual(self.received_message_count, 5)
+
+    # def test_subscribe_message2(self):
+    #     # prepare publisher
+    #     publisher = pubsub_client.PublisherClient(self.project, self.cred)
+    #     publisher.create_topic(self.topic)
+    #     # prepare subscriber
+    #     subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
+    #     self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+
+    #     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    #         # subscriber service is NOT running in main thread
+    #         executor.submit(lambda: self.__subscriber())
+    #         executor.submit(lambda: self.__publisher())
+    #         # wait for callback
+    #         time.sleep(5)
+    #         self.service.shutdown()
+
+    #     # verify if message has been received
+    #     self.assertTrue(self.received_message is not None)
+    #     self.assertEqual(self.published_message_id, self.received_message['message_id'])
+    #     self.assertEqual(self.received_message['data'], 'bytes data')
+    #     self.assertEqual(self.received_message['attributes'], {})
+    #     self.assertEqual(self.received_message_count, 5)
