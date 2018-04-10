@@ -25,7 +25,7 @@ class NormalSubscribeTests(unittest.TestCase):
         self.topic = 'fake-topic'
         self.published_message_id = None
         self.received_message = None
-        self.received_message_count = 0
+        self.received_message_counts = 0
         self.service = None
 
     def tearDown(self):
@@ -38,7 +38,7 @@ class NormalSubscribeTests(unittest.TestCase):
     def __on_received(self, message):
         logger.info('message is received with payload: {}'.format(message))
         self.received_message = message
-        self.received_message_count = self.received_message_count + 1
+        self.received_message_counts = self.received_message_counts + 1
         # ack message
         return True
 
@@ -90,7 +90,8 @@ class NormalSubscribeTests(unittest.TestCase):
         # verify if message has been received
         # self.assertTrue(self.received_message is not None)
         assert self.received_message is not None
-        self.assertEqual(self.published_message_id, self.received_message['message_id'])
-        self.assertEqual(self.received_message['data'], 'bytes data')
-        self.assertEqual(self.received_message['attributes'], {})
-        self.assertEqual(self.received_message_count, 5)
+        assert self.published_message_id == self.received_message['message_id']
+        assert self.received_message['data'] == 'bytes data'
+        assert self.received_message['attributes'] == {}
+        self.assertEqual(self.received_message_counts, 5)
+        assert self.received_message_counts == 5
