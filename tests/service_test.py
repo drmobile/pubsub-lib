@@ -57,7 +57,7 @@ class NormalSubscribeTests(unittest.TestCase):
         logger.info('start publishing message')
         for i in range(5):
             publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
-            time.sleep(1)
+            # time.sleep(1)
 
     def __subscriber(self):
         # prepare subscriber
@@ -82,12 +82,14 @@ class NormalSubscribeTests(unittest.TestCase):
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             executor.submit(lambda: self.__waitter())
-            executor.submit(lambda: self.__publisher())
+            #executor.submit(lambda: self.__publisher())
+            self.__publisher()
             # subscriber service is running in main thread
             self.__subscriber()
 
         # verify if message has been received
-        self.assertTrue(self.received_message is not None)
+        # self.assertTrue(self.received_message is not None)
+        assert self.received_message is not None
         self.assertEqual(self.published_message_id, self.received_message['message_id'])
         self.assertEqual(self.received_message['data'], 'bytes data')
         self.assertEqual(self.received_message['attributes'], {})
