@@ -57,7 +57,7 @@ class NormalSubscribeTests(unittest.TestCase):
         logger.info('start publishing message')
         for _ in range(5):
             publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
-            # time.sleep(1)
+            time.sleep(1)
 
     def __subscriber(self):
         # prepare subscriber
