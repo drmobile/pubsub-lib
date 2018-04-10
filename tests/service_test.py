@@ -55,7 +55,7 @@ class NormalSubscribeTests(unittest.TestCase):
         self.assertFalse(exception_caughted)
         # publish bytes
         logger.info('start publishing message')
-        for i in range(5):
+        for _ in range(5):
             publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
             # time.sleep(1)
 
@@ -82,7 +82,7 @@ class NormalSubscribeTests(unittest.TestCase):
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             executor.submit(lambda: self.__waitter())
-            #executor.submit(lambda: self.__publisher())
+            # executor.submit(lambda: self.__publisher())
             self.__publisher()
             # subscriber service is running in main thread
             self.__subscriber()
