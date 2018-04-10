@@ -44,13 +44,13 @@ class NormalPublishTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # publish bytes
         publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
         # wait for callback
         time.sleep(1)
         # verify if message has been published
-        self.assertTrue(self.published_message_id is not None)
+        assert self.published_message_id is not None
 
     def test_publish_string(self):
         # prepare publisher
@@ -63,13 +63,13 @@ class NormalPublishTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # publish string
         publisher.publish(self.topic, 'string data', callback=lambda message_id: self.__on_published(message_id))
         # wait for callback
         time.sleep(1)
         # verify if message has been published
-        self.assertTrue(self.published_message_id is not None)
+        assert self.published_message_id is not None
 
     def test_publish_dict(self):
         # prepare publisher
@@ -82,7 +82,7 @@ class NormalPublishTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # publish dict
         data = {
             'f1': 1,
@@ -93,7 +93,7 @@ class NormalPublishTests(unittest.TestCase):
         # wait for callback
         time.sleep(1)
         # verify if message has been published
-        self.assertTrue(self.published_message_id is not None)
+        assert self.published_message_id is not None
 
     def test_publish_dict_with_attributes(self):
         # prepare publisher
@@ -106,7 +106,7 @@ class NormalPublishTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # publish dict
         data = {
             'f1': 1,
@@ -117,7 +117,7 @@ class NormalPublishTests(unittest.TestCase):
         # wait for callback
         time.sleep(1)
         # verify if message has been published
-        self.assertTrue(self.published_message_id is not None)
+        assert self.published_message_id is not None
 
     def test_sync_publish(self):
         # prepare publisher
@@ -130,11 +130,11 @@ class NormalPublishTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # publish to the topic in sync way
         message_id, _ = publisher.publish(self.topic, b'bytes data')
         # verify if message_id is returned
-        self.assertTrue(message_id is not None)
+        assert message_id is not None
 
 
 # normal subscribe
@@ -175,7 +175,7 @@ class NormalSubscribeTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
@@ -186,10 +186,10 @@ class NormalSubscribeTests(unittest.TestCase):
         # wait for callback
         time.sleep(1)
         # verify if message has been received
-        self.assertTrue(self.received_message is not None)
-        self.assertEqual(self.published_message_id, self.received_message['message_id'])
-        self.assertEqual(self.received_message['data'], 'bytes data')
-        self.assertEqual(self.received_message['attributes'], {})
+        assert self.received_message is not None
+        assert self.published_message_id == self.received_message['message_id']
+        assert self.received_message['data'] == 'bytes data'
+        assert self.received_message['attributes'] == {}
 
     def test_subscribe_dict_message(self):
         # prepare publisher
@@ -202,7 +202,7 @@ class NormalSubscribeTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
@@ -218,10 +218,10 @@ class NormalSubscribeTests(unittest.TestCase):
         # wait for callback
         time.sleep(1)
         # verify if message has been received
-        self.assertTrue(self.received_message is not None)
-        self.assertEqual(self.published_message_id, self.received_message['message_id'])
-        self.assertEqual(self.received_message['data'], data)
-        self.assertEqual(self.received_message['attributes'], {})
+        assert self.received_message is not None
+        assert self.published_message_id == self.received_message['message_id']
+        assert self.received_message['data'] == data
+        assert self.received_message['attributes'] == {}
 
     def test_subscribe_dict_message_with_attributes(self):
         # prepare publisher
@@ -234,7 +234,7 @@ class NormalSubscribeTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
@@ -250,11 +250,11 @@ class NormalSubscribeTests(unittest.TestCase):
         # wait for callback
         time.sleep(1)
         # verify if message has been received
-        self.assertTrue(self.received_message is not None)
-        self.assertEqual(self.published_message_id, self.received_message['message_id'])
-        self.assertEqual(self.received_message['data'], data)
-        self.assertEqual(self.received_message['attributes']['addition1'], 'test1')
-        self.assertEqual(self.received_message['attributes']['addition2'], 'test2')
+        assert self.received_message is not None
+        assert self.published_message_id == self.received_message['message_id']
+        assert self.received_message['data'] == data
+        assert self.received_message['attributes']['addition1'] == 'test1'
+        assert self.received_message['attributes']['addition2'] == 'test2'
 
     def test_subscribe_message_without_callback(self):
         # prepare publisher
@@ -267,7 +267,7 @@ class NormalSubscribeTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
@@ -283,7 +283,7 @@ class NormalSubscribeTests(unittest.TestCase):
         # wait for callback
         time.sleep(1)
         # verify if message has been processed in previous channel
-        self.assertTrue(self.received_message is None)
+        assert self.received_message is None
 
 
 @pytest.mark.usefixtures("start_emulator")
@@ -359,11 +359,11 @@ class DuplicatedTopicTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # publish to the topic in sync way
         message_id, _ = publisher.publish(self.topic, b'bytes data')
         # verify if message_id is returned
-        self.assertTrue(message_id is not None)
+        assert message_id is not None
 
 
 @pytest.mark.usefixtures("start_emulator")
@@ -397,7 +397,7 @@ class DuplicatedSubscriptionTests(unittest.TestCase):
         except Exception as e:
             exception_caughted = True
             logger.exception('unexpected exception was caughted: {}'.format(e))
-        self.assertFalse(exception_caughted)
+        assert exception_caughted is False
         # prepare subscriber
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
@@ -409,10 +409,10 @@ class DuplicatedSubscriptionTests(unittest.TestCase):
         # wait for callback
         time.sleep(1)
         # verify if message has been received
-        self.assertTrue(self.received_message is not None)
-        self.assertEqual(self.published_message_id, self.received_message['message_id'])
-        self.assertEqual(self.received_message['data'], 'bytes data')
-        self.assertEqual(self.received_message['attributes'], {})
+        assert self.received_message is not None
+        assert self.published_message_id == self.received_message['message_id']
+        assert self.received_message['data'] == 'bytes data'
+        assert self.received_message['attributes'] == {}
 
 
 @pytest.mark.usefixtures("no_emulator")
