@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='soocii-pubsub-lib',
-    version='1.0',
+    version='1.1',
     url='https://github.com/drmobile/pubsub-broker',
     license='Apache Software License',
     author='Soocii',
