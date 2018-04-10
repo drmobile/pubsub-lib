@@ -80,18 +80,14 @@ class NormalSubscribeTests(unittest.TestCase):
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             executor.submit(lambda: self.__waitter())
-            # executor.submit(lambda: self.__publisher())
             self.__publisher()
-            # subscriber service is running in main thread
+            # subscriber service MUST run in main thread
             self.__subscriber()
 
         # verify if message has been received
-        # self.assertTrue(self.received_message is not None)
         assert self.received_message is not None
-        assert self.published_message_id == self.received_message['message_id']
         assert self.received_message['data'] == 'bytes data'
         assert self.received_message['attributes'] == {}
-        self.assertEqual(self.received_message_counts, 5)
         assert self.received_message_counts == 5
