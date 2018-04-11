@@ -48,6 +48,7 @@ class NormalSubscribeTests(unittest.TestCase):
         self.received_message = copy.deepcopy(message)
         # self.received_message_counts = self.received_message_counts + 1
         self.received_message_counts.value = self.received_message_counts.value + 1
+        logger.info('received_message: {}, received_message_counts: {}'.format(self.received_message, self.received_message_counts.value))
         # ack message
         return True
 
