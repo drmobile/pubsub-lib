@@ -47,12 +47,11 @@ class NormalSubscribeTests(unittest.TestCase):
     def __on_received(self, message):
         with self.lock:
             logger.info('message is received with payload: {}'.format(message))
-            # self.received_message = copy.deepcopy(message)
             self.received_message = copy.deepcopy(message)
-            # self.received_message_counts = self.received_message_counts + 1
             self.received_message_counts.value = self.received_message_counts.value + 1
             logger.info('received_message: {}, received_message_counts: {}'.format(self.received_message, self.received_message_counts.value))
         # ack message
+        logger.info('ack message')
         return True
 
     def __publisher(self):

@@ -4,7 +4,9 @@ RUN mkdir -p /var/pubsub/broker
 RUN mkdir -p /var/log/broker
 WORKDIR /var/pubsub/broker
 
-# Provide GCP credentials by setting environment variable
+# Provide GCP credentials by setting environment variable.
+# Porject ID has to be modified accordingly.
+ENV PUBSUB_PROJECT_ID=pubsub-trial-198610
 ENV GOOGLE_APPLICATION_CREDENTIALS=/var/pubsub/broker/pubsub-trial.json
 
 # (Alpine) Install required packages and remove the apk packages cache when done.
