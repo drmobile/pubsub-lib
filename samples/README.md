@@ -1,9 +1,4 @@
-[![Build Status](https://travis-ci.org/drmobile/pubsub-lib.svg?branch=master)](https://travis-ci.org/drmobile/pubsub-lib)
-[![Coverage Status](https://coveralls.io/repos/github/drmobile/pubsub-lib/badge.svg?branch=master)](https://coveralls.io/github/drmobile/pubsub-lib?branch=master)
-
-# pubsub-lib
-
-A generic purpose google cloud pub/sub broker to dispatch subscribed topics.
+# Sample Application
 
 ## Prerequisites
 
@@ -13,3 +8,19 @@ A generic purpose google cloud pub/sub broker to dispatch subscribed topics.
     3. Input a name into the **Service account name** field.
     4. From the **Role** drop-down list, select **Project > Owner**.
     5. Click **Create**. A JSON file that contains your key downloads to your computer.
+
+## Build Docker Image
+
+1. download pub/sub credential and copy to this folder (./samples/pubsub-trial.json)
+
+2. build docker
+
+```
+docker build -t broker .
+```
+
+3. start subscriber service
+
+```
+docker run broker
+```

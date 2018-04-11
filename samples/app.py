@@ -20,7 +20,7 @@ def callback(payload):
 
 if __name__ == '__main__':
     project = None if 'PUBSUB_PROJECT_ID' in os.environ else 'pubsub-trial-198610'
-    cred = None if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ else './pubsub-trial-f5e6dbba824c.json'
+    cred = None if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ else './pubsub-trial.json'
     logger.info('project: {}, cred: {}'.format(project, cred))
 
     # prepare publisher
