@@ -7,6 +7,7 @@ import logging
 import unittest
 import concurrent.futures
 
+from multiprocessing import Manager
 from soocii_pubsub_lib import pubsub_client, sub_service
 
 # ========== Initial Logger ==========
@@ -25,9 +26,14 @@ class NormalSubscribeTests(unittest.TestCase):
         self.cred = None
         self.topic = 'fake-topic'
         self.published_message_id = None
-        self.received_message = None
-        self.received_message_counts = 0
+        # self.received_message = None
+        # self.received_message_counts = 0
         self.service = None
+
+        # shared variables
+        manager = Manager()
+        self.received_message = manager.dict()
+        self.received_message_counts = manager.Value('i', 0)
 
     def tearDown(self):
         pass
@@ -38,8 +44,10 @@ class NormalSubscribeTests(unittest.TestCase):
 
     def __on_received(self, message):
         logger.info('message is received with payload: {}'.format(message))
+        # self.received_message = copy.deepcopy(message)
         self.received_message = copy.deepcopy(message)
-        self.received_message_counts = self.received_message_counts + 1
+        # self.received_message_counts = self.received_message_counts + 1
+        self.received_message_counts.value = self.received_message_counts.value + 1
         # ack message
         return True
 
@@ -58,7 +66,7 @@ class NormalSubscribeTests(unittest.TestCase):
         logger.info('start publishing message')
         for _ in range(5):
             publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
-            time.sleep(1)
+            time.sleep(0.5)
 
     def __subscriber(self):
         # prepare subscriber
@@ -91,4 +99,4 @@ class NormalSubscribeTests(unittest.TestCase):
         assert self.received_message is not None
         assert self.received_message['data'] == 'bytes data'
         assert self.received_message['attributes'] == {}
-        assert self.received_message_counts == 5
+        assert self.received_message_counts.value == 5
