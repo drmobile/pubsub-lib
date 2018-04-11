@@ -5,6 +5,7 @@ import copy
 import pytest
 import logging
 import unittest
+import threading
 import concurrent.futures
 
 from multiprocessing import Manager
@@ -13,7 +14,7 @@ from soocii_pubsub_lib import pubsub_client, sub_service
 # ========== Initial Logger ==========
 logging.basicConfig(
     level=logging.DEBUG,
-    format='[%(asctime)-15s][%(levelname)-5s][%(filename)s][%(funcName)s#%(lineno)d] %(message)s')
+    format='[%(asctime)-15s][%(thread)d][%(levelname)-5s][%(filename)s][%(funcName)s#%(lineno)d] %(message)s')
 logger = logging.getLogger(__name__)
 # ====================================
 
@@ -30,8 +31,9 @@ class NormalSubscribeTests(unittest.TestCase):
         # self.received_message_counts = 0
         self.service = None
 
-        # shared variables
+        # shared variables due to multi-threading
         manager = Manager()
+        self.lock = threading.Lock()
         self.received_message = manager.dict()
         self.received_message_counts = manager.Value('i', 0)
 
@@ -43,12 +45,13 @@ class NormalSubscribeTests(unittest.TestCase):
         self.published_message_id = message_id
 
     def __on_received(self, message):
-        logger.info('message is received with payload: {}'.format(message))
-        # self.received_message = copy.deepcopy(message)
-        self.received_message = copy.deepcopy(message)
-        # self.received_message_counts = self.received_message_counts + 1
-        self.received_message_counts.value = self.received_message_counts.value + 1
-        logger.info('received_message: {}, received_message_counts: {}'.format(self.received_message, self.received_message_counts.value))
+        with self.lock:
+            logger.info('message is received with payload: {}'.format(message))
+            # self.received_message = copy.deepcopy(message)
+            self.received_message = copy.deepcopy(message)
+            # self.received_message_counts = self.received_message_counts + 1
+            self.received_message_counts.value = self.received_message_counts.value + 1
+            logger.info('received_message: {}, received_message_counts: {}'.format(self.received_message, self.received_message_counts.value))
         # ack message
         return True
 
