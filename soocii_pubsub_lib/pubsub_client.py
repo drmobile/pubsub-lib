@@ -168,13 +168,15 @@ class Subscription():
             if callback is not None:
                 # convert data into appropriate python data type
                 try:
+                  # try to convert into str type
                   payload = message.data.decode('utf-8')
                   # try to convert into dict type
                   try:
                       payload = json.loads(payload)
                   except Exception:
                       pass
-                except:
+                except UnicodeDecodeError:
+                  # bytes type
                   payload = message.data
                 # convert attributes into dict type
                 attributes = {attr: message.attributes[attr] for attr in message.attributes}
