@@ -167,12 +167,15 @@ class Subscription():
         try:
             if callback is not None:
                 # convert data into appropriate python data type
-                payload = message.data.decode('utf-8')
-                # try to convert into dict type
                 try:
-                    payload = json.loads(payload)
-                except Exception:
-                    pass
+                  payload = message.data.decode('utf-8')
+                  # try to convert into dict type
+                  try:
+                      payload = json.loads(payload)
+                  except Exception:
+                      pass
+                except:
+                  payload = message.data
                 # convert attributes into dict type
                 attributes = {attr: message.attributes[attr] for attr in message.attributes}
                 dup_msg = {

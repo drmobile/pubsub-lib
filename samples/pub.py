@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == '__main__':
-    project = os.environ['PUBSUB_PROJECT_ID'] if 'PUBSUB_PROJECT_ID' in os.environ else 'pubsub-trial-198610'
-    cred = os.environ['GOOGLE_APPLICATION_CREDENTIALS'] if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ else './pubsub-trial.json'
+    project = os.getenv('PUBSUB_PROJECT_ID', 'pubsub-trial-198610')
+    cred = os.getenv'GOOGLE_APPLICATION_CREDENTIALS', './pubsub-trial.json')
     logger.info('project: {}, cred: {}'.format(project, cred))
 
     # prepare publisher
