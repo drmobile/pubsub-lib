@@ -121,7 +121,8 @@ class PublisherClient(PubSubBase):
         """
         try:
             logger.debug('publish message to {}'.format(topic))
-            if type(payload) is not bytes:
+            dtype = type(payload)
+            if dtype is not bytes:
                 raise ValueError('unexpected data type which is {}, please input bytestring instead.'.format(dtype))
             topic = self.topic_path(self.client, topic)
             future = self.client.publish(topic, payload, **kwargs)
