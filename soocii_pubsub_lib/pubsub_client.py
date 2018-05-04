@@ -106,7 +106,7 @@ class PublisherClient(PubSubBase):
 
         Arguments:
             topic {str} -- The topic name to publish messages to.
-            payload -- A bytestring, string, or dictionary representing the message body.
+            payload -- A bytestring representing the message body.
 
         Keyword Arguments:
             callback {function} -- An optional callback (default: {None})
@@ -121,19 +121,10 @@ class PublisherClient(PubSubBase):
         """
         try:
             logger.debug('publish message to {}'.format(topic))
-            dtype = type(payload)
-            if dtype is bytes:
-                # good to go head
-                msg = payload
-            elif dtype is str:
-                msg = payload.encode('utf-8')
-            elif dtype is dict:
-                # convert dict into JSON
-                msg = json.dumps(payload).encode('utf-8')
-            else:
-                raise ValueError('unexpected data type which is {}.'.format(dtype))
+            if type(payload) is not bytes:
+                raise ValueError('unexpected data type which is {}, please input bytestring instead.'.format(dtype))
             topic = self.topic_path(self.client, topic)
-            future = self.client.publish(topic, msg, **kwargs)
+            future = self.client.publish(topic, payload, **kwargs)
             # async call
             if callback is not None:
                 future.add_done_callback(lambda future: self.__on_published(future, callback))
@@ -166,23 +157,11 @@ class Subscription():
         # callback custom
         try:
             if callback is not None:
-                # convert data into appropriate python data type
-                try:
-                  # try to convert into str type
-                  payload = message.data.decode('utf-8')
-                  # try to convert into dict type
-                  try:
-                      payload = json.loads(payload)
-                  except Exception:
-                      pass
-                except UnicodeDecodeError:
-                  # bytes type
-                  payload = message.data
                 # convert attributes into dict type
                 attributes = {attr: message.attributes[attr] for attr in message.attributes}
                 dup_msg = {
                     'message_id': message.message_id,
-                    'data': payload,
+                    'data': message.data,
                     'attributes': attributes
                 }
                 ack = callback(dup_msg)

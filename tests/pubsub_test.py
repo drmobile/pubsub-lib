@@ -52,26 +52,7 @@ class NormalPublishTests(unittest.TestCase):
         # verify if message has been published
         assert self.published_message_id is not None
 
-    def test_publish_string(self):
-        # prepare publisher
-        publisher = pubsub_client.PublisherClient(self.project, self.cred)
-        publisher.create_topic(self.topic)
-        # get configuration of the topic before sending request
-        exception_caughted = False
-        try:
-            publisher.get_topic(self.topic)
-        except Exception as e:
-            exception_caughted = True
-            logger.exception('unexpected exception was caughted: {}'.format(e))
-        assert exception_caughted is False
-        # publish string
-        publisher.publish(self.topic, 'string data', callback=lambda message_id: self.__on_published(message_id))
-        # wait for callback
-        time.sleep(1)
-        # verify if message has been published
-        assert self.published_message_id is not None
-
-    def test_publish_dict(self):
+    def test_publish_with_attributes(self):
         # prepare publisher
         publisher = pubsub_client.PublisherClient(self.project, self.cred)
         publisher.create_topic(self.topic)
@@ -84,36 +65,7 @@ class NormalPublishTests(unittest.TestCase):
             logger.exception('unexpected exception was caughted: {}'.format(e))
         assert exception_caughted is False
         # publish dict
-        data = {
-            'f1': 1,
-            'f2': '2',
-            'f3': [3, 4, 5]
-        }
-        publisher.publish(self.topic, data, callback=lambda message_id: self.__on_published(message_id))
-        # wait for callback
-        time.sleep(1)
-        # verify if message has been published
-        assert self.published_message_id is not None
-
-    def test_publish_dict_with_attributes(self):
-        # prepare publisher
-        publisher = pubsub_client.PublisherClient(self.project, self.cred)
-        publisher.create_topic(self.topic)
-        # get configuration of the topic before sending request
-        exception_caughted = False
-        try:
-            publisher.get_topic(self.topic)
-        except Exception as e:
-            exception_caughted = True
-            logger.exception('unexpected exception was caughted: {}'.format(e))
-        assert exception_caughted is False
-        # publish dict
-        data = {
-            'f1': 1,
-            'f2': '2',
-            'f3': [3, 4, 5]
-        }
-        publisher.publish(self.topic, data, callback=lambda message_id: self.__on_published(message_id), addition1='test1', addition2='test2')
+        publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id), addition1='test1', addition2='test2')
         # wait for callback
         time.sleep(1)
         # verify if message has been published
@@ -188,10 +140,10 @@ class NormalSubscribeTests(unittest.TestCase):
         # verify if message has been received
         assert self.received_message is not None
         assert self.published_message_id == self.received_message['message_id']
-        assert self.received_message['data'] == 'bytes data'
+        assert self.received_message['data'] == b'bytes data'
         assert self.received_message['attributes'] == {}
 
-    def test_subscribe_dict_message(self):
+    def test_subscribe_message_with_attributes(self):
         # prepare publisher
         publisher = pubsub_client.PublisherClient(self.project, self.cred)
         publisher.create_topic(self.topic)
@@ -207,12 +159,7 @@ class NormalSubscribeTests(unittest.TestCase):
         subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
         self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
         # publish dict
-        data = {
-            'f1': 1,
-            'f2': '2',
-            'f3': [3, 4, 5]
-        }
-        publisher.publish(self.topic, data, callback=lambda message_id: self.__on_published(message_id))
+        publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id), addition1='test1', addition2='test2')
         # open subscription channel, and start receiving message
         self.future = self.subscription.open(callback=lambda message: self.__on_received(message))
         # wait for callback
@@ -220,39 +167,7 @@ class NormalSubscribeTests(unittest.TestCase):
         # verify if message has been received
         assert self.received_message is not None
         assert self.published_message_id == self.received_message['message_id']
-        assert self.received_message['data'] == data
-        assert self.received_message['attributes'] == {}
-
-    def test_subscribe_dict_message_with_attributes(self):
-        # prepare publisher
-        publisher = pubsub_client.PublisherClient(self.project, self.cred)
-        publisher.create_topic(self.topic)
-        # get configuration of the topic before sending request
-        exception_caughted = False
-        try:
-            publisher.get_topic(self.topic)
-        except Exception as e:
-            exception_caughted = True
-            logger.exception('unexpected exception was caughted: {}'.format(e))
-        assert exception_caughted is False
-        # prepare subscriber
-        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
-        # publish dict
-        data = {
-            'f1': 2,
-            'f2': '3',
-            'f3': [4, 5, 6]
-        }
-        publisher.publish(self.topic, data, callback=lambda message_id: self.__on_published(message_id), addition1='test1', addition2='test2')
-        # open subscription channel, and start receiving message
-        self.future = self.subscription.open(callback=lambda message: self.__on_received(message))
-        # wait for callback
-        time.sleep(1)
-        # verify if message has been received
-        assert self.received_message is not None
-        assert self.published_message_id == self.received_message['message_id']
-        assert self.received_message['data'] == data
+        assert self.received_message['data'] == b'bytes data'
         assert self.received_message['attributes']['addition1'] == 'test1'
         assert self.received_message['attributes']['addition2'] == 'test2'
 
@@ -411,7 +326,7 @@ class DuplicatedSubscriptionTests(unittest.TestCase):
         # verify if message has been received
         assert self.received_message is not None
         assert self.published_message_id == self.received_message['message_id']
-        assert self.received_message['data'] == 'bytes data'
+        assert self.received_message['data'] == b'bytes data'
         assert self.received_message['attributes'] == {}
 
 

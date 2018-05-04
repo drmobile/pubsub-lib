@@ -87,7 +87,7 @@ class NormalSubscribeTests(unittest.TestCase):
         time.sleep(10)
         self.service.shutdown()
 
-    @pytest.mark.skip(reason="not reliable in travis CI")
+    # @pytest.mark.skip(reason="not reliable in travis CI")
     def test_subscribe_message(self):
         # prepare publisher
         publisher = pubsub_client.PublisherClient(self.project, self.cred)
@@ -104,6 +104,6 @@ class NormalSubscribeTests(unittest.TestCase):
 
         # verify if message has been received
         assert self.received_message is not None
-        assert self.received_message['data'] == 'bytes data'
+        assert self.received_message['data'] == b'bytes data'
         assert self.received_message['attributes'] == {}
         assert self.received_message_counts.value == 5
