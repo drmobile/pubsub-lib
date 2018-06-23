@@ -140,14 +140,19 @@ class PublisherClient(PubSubBase):
             raise e
 
 
-class Subscription():
-    def __init__(self, subscription):
-        """A wrapped subscription resource for Google Cloud Pub/Sub.
+class SubscribeClient(PubSubBase):
+    def __init__(self, project, cred_json):
+        """A wrapped subscriber client for Google Cloud Pub/Sub.
+
+        This creates an object that is capable of subscribing to messages. Generally, you can instantiate this client with no arguments, and you get sensible defaults.
 
         Arguments:
-            subscription {google.cloud.pubsub_v1.types.Subscription} -- A subscription resource for Google Cloud Pub/Sub.
+            project {str} -- Project id
+            cred_json {str} -- Full path to credential file in json format
         """
-        self.subscription = subscription
+        super(SubscribeClient, self).__init__(project, cred_json)
+        # Instantiates a client
+        self.client = pubsub_v1.SubscriberClient(credentials=self.cred)
 
     def __on_received(self, message, callback):
         # A message data and its attributes.
@@ -175,41 +180,6 @@ class Subscription():
         except Exception as e:
             logger.error('unexpected exception was caughted {}.'.format(e))
 
-    def open(self, callback=None):
-        """Open a streaming pull connection and begin receiving messages.
-        If callback is provided, the message is ack as the callback function return True.
-        If callback is NOT provided, the message is always ack by default.
-
-        Keyword Arguments:
-            callback {function} -- The callback function. This function receives the dictionary as its only argument.
-                                    The message is ack as the callback function return True. (default: {None})
-
-        Returns:
-            concurrent.futures.Future -- A future that provides an interface to block on the subscription if desired, and handle errors.
-        """
-        future = self.subscription.open(lambda message: self.__on_received(message, callback))
-        return future
-
-    def close(self):
-        """Close the existing connection.
-        """
-        self.subscription.close()
-
-
-class SubscribeClient(PubSubBase):
-    def __init__(self, project, cred_json):
-        """A wrapped subscriber client for Google Cloud Pub/Sub.
-
-        This creates an object that is capable of subscribing to messages. Generally, you can instantiate this client with no arguments, and you get sensible defaults.
-
-        Arguments:
-            project {str} -- Project id
-            cred_json {str} -- Full path to credential file in json format
-        """
-        super(SubscribeClient, self).__init__(project, cred_json)
-        # Instantiates a client
-        self.client = pubsub_v1.SubscriberClient(credentials=self.cred)
-
     def create_subscription(self, topic, subscription_name, **kwargs):
         """Creates a subscription to a given topic.
 
@@ -224,9 +194,28 @@ class SubscribeClient(PubSubBase):
             Subscription -- A Subscription instance.
         """
         topic = self.topic_path(self.client, topic)
-        subscription_name = self.subscription_path(self.client, subscription_name)
+        self.subscription_name = self.subscription_path(self.client, subscription_name)
         try:
-            self.client.create_subscription(subscription_name, topic, **kwargs)
+            self.client.create_subscription(self.subscription_name, topic, **kwargs)
         except AlreadyExists:
-            logger.debug('subscription {} already exists.'.format(subscription_name))
-        return Subscription(self.client.subscribe(subscription_name))
+            logger.debug('subscription {} already exists.'.format(self.subscription_name))
+
+    def open(self, callback=None):
+        """Open a streaming pull connection and begin receiving messages.
+        If callback is provided, the message is ack as the callback function return True.
+        If callback is NOT provided, the message is always ack by default.
+
+        Keyword Arguments:
+            callback {function} -- The callback function. This function receives the dictionary as its only argument.
+                                    The message is ack as the callback function return True. (default: {None})
+
+        Returns:
+            concurrent.futures.Future -- A future that provides an interface to block on the subscription if desired, and handle errors.
+        """
+        self.future = self.client.subscribe(self.subscription_name, lambda message: self.__on_received(message, callback))
+        return self.future
+
+    def close(self):
+        """Close the existing connection.
+        """
+        self.future.cancel()

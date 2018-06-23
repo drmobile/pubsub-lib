@@ -76,8 +76,8 @@ class NormalSubscribeTests(unittest.TestCase):
 
     def __subscriber(self):
         # prepare subscriber
-        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        self.subscription = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription.create_subscription(self.topic, 'fake-subscription')
         self.service = sub_service.SubscriptionService(self.subscription)
         logger.info('start subscribing message')
         self.service.run(callback=lambda message: self.__on_received(message))
@@ -93,8 +93,8 @@ class NormalSubscribeTests(unittest.TestCase):
         publisher = pubsub_client.PublisherClient(self.project, self.cred)
         publisher.create_topic(self.topic)
         # prepare subscriber
-        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        self.subscription = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription.create_subscription(self.topic, 'fake-subscription')
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             executor.submit(lambda: self.__waitter())

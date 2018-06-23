@@ -129,8 +129,8 @@ class NormalSubscribeTests(unittest.TestCase):
             logger.exception('unexpected exception was caughted: {}'.format(e))
         assert exception_caughted is False
         # prepare subscriber
-        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        self.subscription = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription.create_subscription(self.topic, 'fake-subscription')
         # publish bytes
         publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
         # open subscription channel, and start receiving message
@@ -156,8 +156,8 @@ class NormalSubscribeTests(unittest.TestCase):
             logger.exception('unexpected exception was caughted: {}'.format(e))
         assert exception_caughted is False
         # prepare subscriber
-        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        self.subscription = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription.create_subscription(self.topic, 'fake-subscription')
         # publish dict
         publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id), addition1='test1', addition2='test2')
         # open subscription channel, and start receiving message
@@ -184,8 +184,8 @@ class NormalSubscribeTests(unittest.TestCase):
             logger.exception('unexpected exception was caughted: {}'.format(e))
         assert exception_caughted is False
         # prepare subscriber
-        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        self.subscription = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription.create_subscription(self.topic, 'fake-subscription')
         # publish bytes
         publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
         # open subscription channel, and start receiving message
@@ -289,7 +289,11 @@ class DuplicatedSubscriptionTests(unittest.TestCase):
         self.topic = 'fake-topic'
 
     def tearDown(self):
-        pass
+        # close subscription channel
+        if self.subscription is not None:
+            self.subscription.close()
+        if self.future is not None:
+            self.future.result()
 
     def __on_published(self, message_id):
         logger.info('message is published with message id: {}'.format(message_id))
@@ -314,9 +318,9 @@ class DuplicatedSubscriptionTests(unittest.TestCase):
             logger.exception('unexpected exception was caughted: {}'.format(e))
         assert exception_caughted is False
         # prepare subscriber
-        subscriber = pubsub_client.SubscribeClient(self.project, self.cred)
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
-        self.subscription = subscriber.create_subscription(self.topic, 'fake-subscription')
+        self.subscription = pubsub_client.SubscribeClient(self.project, self.cred)
+        self.subscription.create_subscription(self.topic, 'fake-subscription')
+        self.subscription.create_subscription(self.topic, 'fake-subscription')
         # publish bytes
         publisher.publish(self.topic, b'bytes data', callback=lambda message_id: self.__on_published(message_id))
         # open subscription channel, and start receiving message
