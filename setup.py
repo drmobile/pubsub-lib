@@ -35,7 +35,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['six', 'google-cloud>=0.33.1', 'google-cloud-pubsub>=0.35.4'],
+    install_requires=['six', 'google-cloud-pubsub>=0.35.4'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
