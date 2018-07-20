@@ -1,5 +1,5 @@
 # coding=utf-8
-#
+import os
 import abc
 import six
 import json
@@ -125,16 +125,19 @@ class PublisherClient(PubSubBase):
             if dtype is not bytes:
                 raise ValueError('unexpected data type which is {}, please input bytestring instead.'.format(dtype))
             topic = self.topic_path(self.client, topic)
+            logger.debug('Execute client.publish. pid: {}, payload: {}. '.format(os.getpid(), json.dumps(payload)))
             future = self.client.publish(topic, payload, **kwargs)
+            logger.debug('Executed client.publish. pid: {}.'.format(os.getpid()))
+
             # async call
             if callback is not None:
                 future.add_done_callback(lambda future: self.__on_published(future, callback))
-                return (None, future)
+                return None, future
             # sync call
             else:
                 message_id = future.result()
                 logger.info('data has been publised with message id {}.'.format(message_id))
-                return (message_id, future)
+                return message_id, future
         except Exception as e:
             logger.exception('unexpected exception was caughted: {}'.format(e))
             raise e
