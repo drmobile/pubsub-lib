@@ -1,5 +1,5 @@
 # coding=utf-8
-#
+import os
 import abc
 import six
 import json
@@ -120,21 +120,25 @@ class PublisherClient(PubSubBase):
             (str, concurrent.futures.Future) -- A tuple of message id and future instance
         """
         try:
-            logger.debug('publish message to {}'.format(topic))
+            logger.debug('publish message to %s, pid: %s', topic, os.getpid())
             dtype = type(payload)
             if dtype is not bytes:
                 raise ValueError('unexpected data type which is {}, please input bytestring instead.'.format(dtype))
             topic = self.topic_path(self.client, topic)
+            logger.debug('Execute client.publish. pid: %.', os.getpid())
             future = self.client.publish(topic, payload, **kwargs)
+            logger.debug('Executed client.publish. pid: %s.', os.getpid())
+
             # async call
             if callback is not None:
                 future.add_done_callback(lambda future: self.__on_published(future, callback))
-                return (None, future)
+                return None, future
             # sync call
             else:
+                logger.debug('Execute future.result. pid: %s.', os.getpid())
                 message_id = future.result()
                 logger.info('data has been publised with message id {}.'.format(message_id))
-                return (message_id, future)
+                return message_id, future
         except Exception as e:
             logger.exception('unexpected exception was caughted: {}'.format(e))
             raise e
