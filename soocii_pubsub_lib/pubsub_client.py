@@ -125,7 +125,7 @@ class PublisherClient(PubSubBase):
             if dtype is not bytes:
                 raise ValueError('unexpected data type which is {}, please input bytestring instead.'.format(dtype))
             topic = self.topic_path(self.client, topic)
-            logger.debug('Execute client.publish. pid: %.', os.getpid())
+            logger.debug('Execute client.publish. pid: %s.', os.getpid())
             future = self.client.publish(topic, payload, **kwargs)
             logger.debug('Executed client.publish. pid: %s.', os.getpid())
 
