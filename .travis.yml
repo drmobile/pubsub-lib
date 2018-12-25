@@ -20,12 +20,12 @@ notifications:
   email:
     on_success: never
     recipients:
-      - service@soocii.me
+    - service@soocii.me
 deploy:
   provider: pypi
-  user: jonascheng
+  user: SoociiDev
   password:
-    secure: J8zuUA7vOS8s7NemgjBMnw07aLtrc7VfNnDpxLIpR7btENL1miXeytLHArNOSzEIoKeOp96ue0jVPlvrKOFNZ+feqechww6O5mkIFRTPqQk7MNScZIQxvHASvqL+JYL38vbnENIMHiOYEUzs3z8fYWblZ7S4SsLMZTGQ47fuOlob9AthSKIj41Nx4Lfw6Bli0dyA/5KD2YqGBf9kDiaGs1uBmquw2QjEkB5Q4oHqdHeuUtoRhIBsNq9y2uw5ZbGqcl4bKwypPOxKgTvYKg9Xl1OC/JAe/3SrKCYgYlpR3rJGfM+jGSe3oiwwziilTFn93JO380mLNzbh9zpLaEF/Us7j+w8prh62fZewp76+04VEVdLJ0XfaCpSDZSSJ1JZDOl4jmWdOeCh6PyQ0BGkNOPJF6a/a3mCFque2bZzmCHlMnFs43pxaZhqcUbFtHaM/w07YFPhKS5PLIEiEiN7BosjU8rXXOFHBuDKTzSEvOZTt6dWQcCTgOG9Xb9jQEKg+U9LiT2fgCSTuv4cQj2rThmAN/Yz6GBcrrM+Ycg79qebVzRb5qEWOzSz8ddzjPfUPYlsoNBvKPmgVS/7kme0S3Vr4eCh/xjICCREAzuV4qxHrH3TB3okvyLJpQEi6JlUi1myj+UZuI0/jxW4wVUiwUjz8i2zZpZV1DrrXMgaeG3s=
+    secure: Hs6tYeD4fX6jC6LzmCPIq4iWgeDFV2uA65MJA+a5ip7vo0lJsriblcAE601uXKz57tmtF+I/btuPshx7R47W9jIeVBvdtqPri8ZDj2PV+3nMwFdHgpp057h3xJ5UBVBMjK9HXTtpR5oIP5lSF7HQ8q/i6E+rJN2ocpL2w+WUq6GmoXyq44JB+FQQuBe/r+6X0lyq9Muz3LRNLlM5528EUSLJ2MaEzqsa/szXkCw8Rj7w01b+zvXsV0+cA4qafco/dZnS/3I/FnlH6NEUCBLewCjHAoa9QGUi3lnLRHm/b1tYlbopRG5uDqTQKCfTkOkEBw8B7TV9jchpLKvYMjo58QJ+U9ag3LvD2d1ci5MOeIgwxz0TLK8O1jp5sdvEdgWdruwIqZhaQyl0L6j0qdZypaEo/+QJQgi6+QmSYcZyki1nvuyRNZIVgogXic6G4zJAEhunQP2vMG+BCJUCl8EVd8jjFqy5e78tLHFrfIv18uimYt+SpL4vBfRXHP2AMZ4LOTwR2XuwTLj/i8SPhAiN+cNd9I9idaISMnDaVMiyaP25je+9D45ACyF/MFbSSjy2zT6yF/lI2IClnhWi+RCIqdkZbavdzvLUl2x+yHI2Ex7nsrM4ipAIURy7tcjfT4IIUddBODEiIfKNkJmrEyOxJIxV7MwOtnabEvRfx//GYFs=
   on:
     branch: master
     tags: true
